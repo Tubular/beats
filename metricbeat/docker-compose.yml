@@ -7,6 +7,7 @@ services:
       - couchbase
       - mongodb
       - haproxy
+      - jolokia
       - kafka
       - mysql
       - nginx
@@ -52,6 +53,19 @@ services:
   # Overloading kibana with a simple image as it is not needed here
   kibana:
     image: alpine:latest
+    env_file:
+      - ${PWD}/module/apache/_meta/env
+      - ${PWD}/module/couchbase/_meta/env
+      - ${PWD}/module/haproxy/_meta/env
+      - ${PWD}/module/jolokia/_meta/env
+      - ${PWD}/module/kafka/_meta/env
+      - ${PWD}/module/mongodb/_meta/env
+      - ${PWD}/module/mysql/_meta/env
+      - ${PWD}/module/nginx/_meta/env
+      - ${PWD}/module/postgresql/_meta/env
+      - ${PWD}/module/prometheus/_meta/env
+      - ${PWD}/module/redis/_meta/env
+      - ${PWD}/module/zookeeper/_meta/env
 
   # Modules
   apache:
@@ -59,6 +73,12 @@ services:
 
   couchbase:
     build: ${PWD}/module/couchbase/_meta
+
+  haproxy:
+    build: ${PWD}/module/haproxy/_meta
+
+  jolokia:
+    build: ${PWD}/module/jolokia/_meta
 
   kafka:
     image: spotify/kafka
