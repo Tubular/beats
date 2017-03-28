@@ -80,4 +80,4 @@ generate-json: build-image
 # Simple deb (shortcut)
 .PHONY: linuxdeb
 linuxdeb:
-    SNAPSHOT=no PACKAGES=${BEATNAME}/deb TARGETS="linux/amd64" make package
+	SNAPSHOT=no PACKAGES=${BEATNAME}/deb TARGETS="linux/amd64" make package
