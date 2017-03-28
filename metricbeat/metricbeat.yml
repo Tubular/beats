@@ -10,41 +10,41 @@
 #==========================  Modules configuration ============================
 metricbeat.modules:
 
-#------------------------------- System Module -------------------------------
-- module: system
-  metricsets:
-    # CPU stats
-    - cpu
+# #------------------------------- System Module -------------------------------
+# - module: system
+#   metricsets:
+#     # CPU stats
+#     - cpu
 
-    # System Load stats
-    - load
+#     # System Load stats
+#     - load
 
-    # Per CPU core stats
-    #- core
+#     # Per CPU core stats
+#     #- core
 
-    # IO stats
-    #- diskio
+#     # IO stats
+#     #- diskio
 
-    # Per filesystem stats
-    - filesystem
+#     # Per filesystem stats
+#     - filesystem
 
-    # File system summary stats
-    - fsstat
+#     # File system summary stats
+#     - fsstat
 
-    # Memory stats
-    - memory
+#     # Memory stats
+#     - memory
 
-    # Network stats
-    - network
+#     # Network stats
+#     - network
 
-    # Per process stats
-    - process
+#     # Per process stats
+#     - process
 
-    # Sockets (linux only)
-    #- socket
-  enabled: true
-  period: 10s
-  processes: ['.*']
+#     # Sockets (linux only)
+#     #- socket
+#   enabled: true
+#   period: 10s
+#   processes: ['.*']
 
 
 
@@ -63,15 +63,282 @@ metricbeat.modules:
 #fields:
 #  env: staging
 
+#------------------------------- Jolokia Module ------------------------------
+- module: jolokia
+  metricsets: ["jmx"]
+  enabled: true
+  period: 1s
+  hosts: ["localhost:9000"]
+  namespace: "metrics"
+  path: "/jolokia/?ignoreErrors=true&canonicalNaming=false"
+  jmx.mappings:
+     - mbean: 'java.lang:type=Runtime'
+       attributes:
+         - attr: Uptime
+           field: uptime
+     - mbean: 'java.lang:name=ConcurrentMarkSweep,type=GarbageCollector'
+       attributes:
+         - attr: CollectionTime
+           field: gc.cms_collection_time
+         - attr: CollectionCount
+           field: gc.cms_collection_count
+     - mbean: 'java.lang:type=Memory'
+       attributes:
+         - attr: HeapMemoryUsage
+           field: memory.heap_usage
+         - attr: NonHeapMemoryUsage
+           field: memory.non_heap_usage
+     - mbean: 'org.apache.cassandra.RPC-THREAD-POOL:type=RPC-Thread'
+       attributes:
+         - attr: TotalBlockedTasks
+           field: rpc_thread-total_blocked_tasks
+         - attr: PendingTasks
+           field: rpc_thread-pending_tasks
+         - attr: MaximumThreads
+           field: rpc_thread-maximum_threads
+         - attr: CurrentlyBlockedTasks
+           field: rpc_thread-currently_blocked_tasks
+         - attr: ActiveCount
+           field: rpc_thread-active_count
+         - attr: CompletedTasks
+           field: rpc_thread-completed_tasks
+         - attr: CoreThreads
+           field: rpc_thread-core_threads
+     # - mbean: 'org.apache.cassandra.db:keyspace=natural,columnfamily=instagram_accounts,type=ColumnFamilies'
+     #   attributes:
+     # - mbean: 'org.apache.cassandra.db:keyspace=natural,columnfamily=instagram_accounts_cidx_username,type=ColumnFamilies'
+     #   attributes:
+     - mbean: 'org.apache.cassandra.db:type=CompactionManager'
+       attributes:
+         - attr: Compactions
+           field: compaction_manager-compactions
+         - attr: CoreCompactorThreads
+           field: compaction_manager-core_compactor_threads
+         - attr: MaximumCompactorThreads
+           field: compaction_manager-maximum_compactor_threads
+         - attr: CompactionSummary
+           field: compaction_manager-compaction_summary
+         - attr: TotalCompactionsCompleted
+           field: compaction_manager-total_compactions_completed
+         - attr: CompletedTasks
+           field: compaction_manager-completed_tasks
+         - attr: CoreValidationThreads
+           field: compaction_manager-core_validation_threads
+         - attr: MaximumValidatorThreads
+           field: compaction_manager-maximum_validator_threads
+         - attr: TotalBytesCompacted
+           field: compaction_manager-total_bytes_compacted
+         # - attr: CompactionHistory
+         #   field: compaction_manager-compaction_history
+         - attr: PendingTasks
+           field: compaction_manager-pending_tasks
+     - mbean: 'org.apache.cassandra.metrics:name=ReadLatency,type=ColumnFamily'
+       attributes:
+         - attr: Count
+           field: read_latency-count
+         - attr: RateUnit
+           field: read_latency-rate_unit
+         - attr: Min
+           field: read_latency-min
+         - attr: EventType
+           field: read_latency-event_type
+         - attr: Max
+           field: read_latency-max
+         - attr: 98thPercentile
+           field: read_latency-98th_percentile
+         - attr: FiveMinuteRate
+           field: read_latency-five_minute_rate
+         - attr: 95thPercentile
+           field: read_latency-95th_percentile
+         - attr: MeanRate
+           field: read_latency-mean_rate
+         - attr: 75thPercentile
+           field: read_latency-75th_percentile
+         - attr: FifteenMinuteRate
+           field: read_latency-fifteen_minute_rate
+         - attr: 99thPercentile
+           field: read_latency-99th_percentile
+         - attr: StdDev
+           field: read_latency-std_dev
+         - attr: LatencyUnit
+           field: read_latency-latency_unit
+         - attr: 50thPercentile
+           field: read_latency-50th_percentile
+         - attr: 999thPercentile
+           field: read_latency-999th_percentile
+         - attr: OneMinuteRate
+           field: read_latency-one_minute_rate
+         - attr: Mean
+           field: read_latency-mean
+     # - mbean: 'org.apache.cassandra.metrics:keyspace=natural,name=ReadLatency,scope=instagram_accounts,type=ColumnFamily'
+     #   attributes:
+     # - mbean: 'org.apache.cassandra.metrics:keyspace=natural,name=ReadLatency,scope=instagram_accounts_cidx_username,type=ColumnFamily'
+     #   attributes:
+     - mbean: 'org.apache.cassandra.metrics:name=LiveSSTableCount,type=ColumnFamily'
+       attributes:
+         - attr: Value
+           field: live_ss_table_count-value
+     # - mbean: 'org.apache.cassandra.metrics:keyspace=natural,name=LiveSSTableCount,scope=instagram_accounts,type=ColumnFamily'
+     #   attributes:
+     # - mbean: 'org.apache.cassandra.metrics:keyspace=natural,name=LiveSSTableCount,scope=instagram_accounts_cidx_username,type=ColumnFamily'
+     #   attributes:
+     # - mbean: 'org.apache.cassandra.metrics:keyspace=natural,name=CoordinatorReadLatency,scope=instagram_accounts,type=ColumnFamily'
+     #   attributes:
+     # - mbean: 'org.apache.cassandra.metrics:keyspace=natural,name=CoordinatorReadLatency,scope=instagram_accounts_cidx_username,type=ColumnFamily'
+     #   attributes:
+     # - mbean: 'org.apache.cassandra.metrics:keyspace=natural,name=CoordinatorReadLatency,scope=instagram_accounts_cidx_username,type=ColumnFamily'
+     #   attributes:
+     - mbean: 'org.apache.cassandra.metrics:name=SSTablesPerReadHistogram,type=ColumnFamily'
+       attributes:
+         - attr: Count
+           field: ss_tables_per_read_histogram-count
+         - attr: Min
+           field: ss_tables_per_read_histogram-min
+         - attr: Max
+           field: ss_tables_per_read_histogram-max
+         - attr: 98thPercentile
+           field: ss_tables_per_read_histogram-98th_percentile
+         - attr: 95thPercentile
+           field: ss_tables_per_read_histogram-95th_percentile
+         - attr: 75thPercentile
+           field: ss_tables_per_read_histogram-75th_percentile
+         - attr: 99thPercentile
+           field: ss_tables_per_read_histogram-99th_percentile
+         - attr: StdDev
+           field: ss_tables_per_read_histogram-std_dev
+         - attr: 50thPercentile
+           field: ss_tables_per_read_histogram-50th_percentile
+         - attr: 999thPercentile
+           field: ss_tables_per_read_histogram-999th_percentile
+         - attr: Mean
+           field: ss_tables_per_read_histogram-mean
+     # - mbean: 'org.apache.cassandra.metrics:keyspace=natural,name=SSTablesPerReadHistogram,scope=instagram_accounts,type=ColumnFamily'
+     #   attributes:
+     # - mbean: 'org.apache.cassandra.metrics:keyspace=natural,name=SSTablesPerReadHistogram,scope=instagram_accounts_cidx_username,type=ColumnFamily'
+     #   attributes:
+     - mbean: 'org.apache.cassandra.metrics:name=HitRate,scope=CounterCache,type=Cache'
+       attributes:
+         - attr: Value
+           field: cache_counter_cache_hit_rate-value
+     - mbean: 'org.apache.cassandra.metrics:name=HitRate,scope=KeyCache,type=Cache'
+       attributes:
+         - attr: Value
+           field: cache_key_cache_hit_rate-value
+     - mbean: 'org.apache.cassandra.metrics:name=HitRate,scope=RowCache,type=Cache'
+       attributes:
+         - attr: Value
+           field: cache_row_cache_hit_rate-value
+     - mbean: 'org.apache.cassandra.metrics:name=TotalTimeouts,type=Connection'
+       attributes:
+         - attr: Count
+           field: connection_total_timeouts-count
+         - attr: RateUnit
+           field: connection_total_timeouts-rate_unit
+         - attr: EventType
+           field: connection_total_timeouts-event_type
+         - attr: FiveMinuteRate
+           field: connection_total_timeouts-five_minute_rate
+         - attr: FifteenMinuteRate
+           field: connection_total_timeouts-fifteen_minute_rate
+         - attr: MeanRate
+           field: connection_total_timeouts-mean_rate
+         - attr: OneMinuteRate
+           field: connection_total_timeouts-one_minute_rate
+     - mbean: 'org.apache.cassandra.request:type=MutationStage'
+       attributes:
+         - attr: TotalBlockedTasks
+           field: mutation_stage-total_blocked_tasks
+         - attr: PendingTasks
+           field: mutation_stage-pending_tasks
+         - attr: MaximumThreads
+           field: mutation_stage-maximum_threads
+         - attr: CurrentlyBlockedTasks
+           field: mutation_stage-currently_blocked_tasks
+         - attr: ActiveCount
+           field: mutation_stage-active_count
+         - attr: CompletedTasks
+           field: mutation_stage-completed_tasks
+         - attr: CoreThreads
+           field: mutation_stage-core_threads
+     - mbean: 'org.apache.cassandra.request:type=ReadStage'
+       attributes:
+         - attr: TotalBlockedTasks
+           field: read_stage-total_blocked_tasks
+         - attr: PendingTasks
+           field: read_stage-pending_tasks
+         - attr: MaximumThreads
+           field: read_stage-maximum_threads
+         - attr: CurrentlyBlockedTasks
+           field: read_stage-currently_blocked_tasks
+         - attr: ActiveCount
+           field: read_stage-active_count
+         - attr: CompletedTasks
+           field: read_stage-completed_tasks
+         - attr: CoreThreads
+           field: read_stage-core_threads
+     - mbean: 'org.apache.cassandra.metrics:name=Dropped,scope=READ,type=DroppedMessage'
+       attributes:
+         - attr: Count
+           field: dropped_message_read-count
+         - attr: RateUnit
+           field: dropped_message_read-rate_unit
+         - attr: EventType
+           field: dropped_message_read-event_type
+         - attr: FiveMinuteRate
+           field: dropped_message_read-five_minute_rate
+         - attr: FifteenMinuteRate
+           field: dropped_message_read-fifteen_minute_rate
+         - attr: MeanRate
+           field: dropped_message_read-mean_rate
+         - attr: OneMinuteRate
+           field: dropped_message_read-one_minute_rate
+     - mbean: 'org.apache.cassandra.internal:type=CompactionExecutor'
+       attributes:
+         - attr: TotalBlockedTasks
+           field: compaction_executor-total_blocked_tasks
+         - attr: PendingTasks
+           field: compaction_executor-pending_tasks
+         - attr: MaximumThreads
+           field: compaction_executor-maximum_threads
+         - attr: CurrentlyBlockedTasks
+           field: compaction_executor-currently_blocked_tasks
+         - attr: ActiveCount
+           field: compaction_executor-active_count
+         - attr: CompletedTasks
+           field: compaction_executor-completed_tasks
+         - attr: CoreThreads
+           field: compaction_executor-core_threads
+     - mbean: 'java.lang:type=Memory'
+       attributes:
+         - attr: NonHeapMemoryUsage
+           field: javalang_memory-non_heap_memory_usage
+         - attr: HeapMemoryUsage
+           field: javalang_memory-heap_memory_usage
+         - attr: ObjectPendingFinalizationCount
+           field: javalang_memory-object_pending_finalization_count
+         - attr: ObjectName
+           field: javalang_memory-object_name
+         - attr: Verbose
+           field: javalang_memory-verbose
+
+
 #================================ Outputs =====================================
 
 # Configure what outputs to use when sending the data collected by the beat.
 # Multiple outputs may be used.
 
+#----------------------------- Console output ---------------------------------
+output.console:
+  # Boolean flag to enable or disable the output module.
+  enabled: true
+
+  # Pretty print json event
+  pretty: true
+
 #-------------------------- Elasticsearch output ------------------------------
-output.elasticsearch:
-  # Array of hosts to connect to.
-  hosts: ["localhost:9200"]
+# output.elasticsearch:
+#   # Array of hosts to connect to.
+#   hosts: ["localhost:9200"]
 
   # Optional protocol and basic auth credentials.
   #protocol: "https"
