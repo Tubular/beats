@@ -77,3 +77,7 @@ create-metricset:
 generate-json: build-image
 	 ${DOCKER_COMPOSE} run beat go test -tags=integration github.com/elastic/beats/metricbeat/module/... -data
 
+# Simple deb (shortcut)
+.PHONY: linuxdeb
+linuxdeb:
+    SNAPSHOT=no PACKAGES=${BEATNAME}/deb TARGETS="linux/amd64" make package
